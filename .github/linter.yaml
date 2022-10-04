@@ -1,0 +1,47 @@
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the master branch
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+name: Clippy & fmt
+
+jobs:
+  templates:
+    name: Format Templates
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        crates:
+          - default/Cargo.toml
+          - cis2-nft/Cargo.toml
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Install nightly toolchain with rustfmt available
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly-2022-06-09
+          override: true
+          components: rustfmt
+
+      - name: Install cargo-generate
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-generate
+
+      - name: Install cargo-generate
+        uses: actions-rs/cargo@v1
+        with:
+          command: generate
+          args: --path=${{ matrix.crates }}
